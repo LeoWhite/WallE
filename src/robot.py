@@ -13,7 +13,7 @@ class Robot(object):
         self._tb.Init()
 
         # Did we find it?
-        if not self._tb.foundChips:
+        if not self._tb.foundChip:
           print('No ThunderBorg found, please check connections')
           sys.exit()
           
@@ -82,4 +82,3 @@ class Robot(object):
     def set_tilt(self, angle):
       # TODO: Set the Tilt servo
       return
-
