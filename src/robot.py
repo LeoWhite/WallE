@@ -48,9 +48,9 @@ class Robot(object):
         # TODO: Set up the distance sensor
         
         # TODO: Setup the encoders
-        EncoderCounter.set_constants(self.wheel_diameter_mm, self.ticks_per_revolution)
-        self.left_encoder = EncoderCounter(4)
-        self.right_encoder = EncoderCounter(26)
+        #EncoderCounter.set_constants(self.wheel_diameter_mm, self.ticks_per_revolution)
+        #self.left_encoder = EncoderCounter(4)
+        #self.right_encoder = EncoderCounter(26)
         
         # TODO: Setup any extra LEDS
         
