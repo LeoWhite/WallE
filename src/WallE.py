@@ -1,5 +1,5 @@
 from robot import Robot
-from gpiozero import Servo
+from gpiozero import Servo, LED
 import atexit
 import time
 
@@ -14,16 +14,20 @@ class WallE(Robot):
     print('Setting up WallE')
     
     # Setup/center HEAD
-    self._head = Servo(5)
+    self._head = Servo(6)
     
     # Setup the left arm
-    self._leftArm = Servo(24)
+    self._leftArm = Servo(13)
     
     # Setup the right arm
-    self._rightArm = Servo(12)
+    self._rightArm = Servo(5)
     
     # Center the servos
     self.center_servos()
+    
+    # Setup the eyes
+    self._eyes = LED(25)
+    self._eyes.on()
     
     # Ensure the motors get stopped when the code exits
     atexit.register(self.center_servos)

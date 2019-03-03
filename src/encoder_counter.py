@@ -9,7 +9,7 @@ class EncoderCounter(DigitalInputDevice):
         self.pulse_count = 0
         self.direction = 1
 
-    def when_changed(self):
+    def when_changed(self, ticks, state):
         self.pulse_count += self.direction
 
     def set_direction(self, direction):
