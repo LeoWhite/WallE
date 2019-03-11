@@ -49,8 +49,8 @@ class Robot(object):
         
         # TODO: Setup the encoders
         EncoderCounter.set_constants(self.wheel_diameter_mm, self.ticks_per_revolution)
-        self.left_encoder = EncoderCounter(24)
-        self.right_encoder = EncoderCounter(12)
+        self.left_encoder = EncoderCounter(26)
+        self.right_encoder = EncoderCounter(6)
         
         # TODO: Setup any extra LEDS
         

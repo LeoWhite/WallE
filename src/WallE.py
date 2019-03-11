@@ -14,13 +14,13 @@ class WallE(Robot):
     print('Setting up WallE')
     
     # Setup/center HEAD
-    self._head = Servo(6)
+    self._head = Servo(24)
     
     # Setup the left arm
-    self._leftArm = Servo(13)
+    self._leftArm = Servo(5)
     
     # Setup the right arm
-    self._rightArm = Servo(5)
+    self._rightArm = Servo(12)
     
     # Center the servos
     self.center_servos()
