@@ -56,18 +56,7 @@ img = Image.new('RGB', (WIDTH, HEIGHT), color=(0, 0, 0))
 draw = ImageDraw.Draw(img)
 
 # Draw a red rectangle with yellow outline.
-draw.rectangle((0, 10, 10, HEIGHT-10), outline=(255,0,0), fill=(255,0,0))
-
-# Draw some shapes.
-# Draw a blue ellipse with a green outline.
-#draw.ellipse((10, 10, WIDTH-10, HEIGHT-10), outline=(0,255,0), fill=(0,0,255))
-
-# Draw a white X.
-#draw.line((10, 10, WIDTH-10, HEIGHT-10), fill=(255,255,255))
-#draw.line((10, HEIGHT-10, WIDTH-10, 10), fill=(255,255,255))
-
-# Draw a cyan triangle with a black outline.
-#draw.polygon([(WIDTH/2, 10), (WIDTH-10, HEIGHT-10), (10, HEIGHT-10)], outline=(0,0,0), fill=(0,255,255))
+draw.rectangle((WIDTH-10, 10, WIDTH, HEIGHT-10), outline=(255,0,0), fill=(255,0,0))
 
 # Load default font.
 font = ImageFont.load_default()
@@ -115,23 +104,23 @@ imgSolar = Image.new('RGB', (WIDTH, HEIGHT), color=(0, 0, 0))
 
 drawSolar = ImageDraw.Draw(imgSolar)
 
-drawSolar.rectangle((0, 10, 16, HEIGHT-10), outline=(0,0,0), fill=(255,255,0))
+drawSolar.rectangle((WIDTH, 10, WIDTH-16, HEIGHT-10), outline=(0,0,0), fill=(255,255,0))
 
 disp.display(imgSolar)
 
-offset=25
+offset=WIDTH
 
 time.sleep(0.5)
 
-drawSolar.rectangle((offset, 10, offset+4, HEIGHT-10), outline=(255,255,0), fill=(255,255,0))
-offset += 14
+drawSolar.rectangle((offset, 10, offset-4, HEIGHT-10), outline=(255,255,0), fill=(255,255,0))
+offset -= 14
 
 time.sleep(0.5)
 
 
-for x in range(1, 9):
-  drawSolar.rectangle((offset, 10, offset+4, HEIGHT-10), outline=(255,255,0), fill=(255,255,0))
-  offset += 14
+for x in range(1, 11):
+  drawSolar.rectangle((offset, 10, offset-4, HEIGHT-10), outline=(255,255,0), fill=(255,255,0))
+  offset -= 14
   disp.display(imgSolar)
   time.sleep(0.025)
 
