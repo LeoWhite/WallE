@@ -27,7 +27,7 @@ class WallE(Robot):
     
     # Setup the eyes
     self._eyes = LED(25)
-    self._eyes.on()
+    # self._eyes.on()
     
     # Ensure the motors get stopped when the code exits
     atexit.register(self.center_servos)

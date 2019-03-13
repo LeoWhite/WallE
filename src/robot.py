@@ -3,6 +3,7 @@ import atexit
 import sys
 
 from encoder_counter import EncoderCounter
+from distance_sensor_vl53l1x import DistanceSensor
 
 # Main code base for a ThunderBorg based robot.
 
@@ -46,8 +47,9 @@ class Robot(object):
         atexit.register(self.stop_all)
         
         # TODO: Set up the distance sensor
+        self.distance_sensor = DistanceSensor()
         
-        # TODO: Setup the encoders
+        # Setup the encoders
         EncoderCounter.set_constants(self.wheel_diameter_mm, self.ticks_per_revolution)
         self.left_encoder = EncoderCounter(26)
         self.right_encoder = EncoderCounter(6)
@@ -95,3 +97,5 @@ class Robot(object):
     def set_led(self, r, g, b):
       self._tb.SetLeds(r, g, b)
 
+    def get_distance(self):
+      return self.distance_sensor.get_distance()
