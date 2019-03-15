@@ -26,13 +26,33 @@ class Robot(object):
         # Setup communications failsafe
         failsafe = False
         for i in range(5):
-          self._tb.SetCommsFailsafe(True)
+          self._tb.SetCommsFailsafe(False)
           failsafe = self._tb.GetCommsFailsafe()
           if failsafe:
             break
-        if not failsafe:
-          print('Board %02X failed to report in failsafe mode!' % (self._tb.i2cAddress))
-          sys.exit()
+
+        battMin, battMax = self._tb.GetBatteryMonitoringLimits() 
+        battCurrent = self._tb.GetBatteryReading()
+        print 'Current battery monitoring settings:' 
+        print '    Minimum  (red)     %02.2f V' % (battMin)  
+        print '    Half-way (yellow)  %02.2f V' % ((battMin + battMax) / 2) 
+        print '    Maximum  (green)   %02.2f V' % (battMax) 
+        print  
+        print '    Current voltage    %02.2f V' % (battCurrent) 
+        print  
+
+        self._tb.SetBatteryMonitoringLimits(9.6, 12.6) 
+
+        battMin, battMax = self._tb.GetBatteryMonitoringLimits() 
+        battCurrent = self._tb.GetBatteryReading()
+        print 'Current battery monitoring settings:' 
+        print '    Minimum  (red)     %02.2f V' % (battMin)  
+        print '    Half-way (yellow)  %02.2f V' % ((battMin + battMax) / 2) 
+        print '    Maximum  (green)   %02.2f V' % (battMax) 
+        print  
+        print '    Current voltage    %02.2f V' % (battCurrent) 
+        print  
+        self._tb.SetLedShowBattery(True)
 
         # Abstract out the motor numbers
         self.left_motor = self._tb.SetMotor1
@@ -80,7 +100,6 @@ class Robot(object):
       if not self.drive_enabled:
         return;
         
-      # TODO: Validate speed, adjust for MAX power limitations
       self.right_motor(speed)
     
     def stop_motors(self):
