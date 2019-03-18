@@ -8,8 +8,8 @@ from distance_sensor_vl53l1x import DistanceSensor
 # Main code base for a ThunderBorg based robot.
 
 class Robot(object):
-    wheel_diameter_mm = 60.0
-    ticks_per_revolution = 63.0 * 20 # Gear ratio * 20
+    wheel_diameter_mm = 56.0
+    ticks_per_revolution = 63.0 * 10 # Gear ratio * 10 (We are only counting one channel of the encoder, otherwise it would be * 20)
     wheel_distance_mm =  175.0
 
     def __init__(self, thunderBorgI2CAddress=0x15, drive_enabled=True):
@@ -23,36 +23,17 @@ class Robot(object):
           print('No ThunderBorg found, please check connections')
           sys.exit()
           
-        # Setup communications failsafe
+        # Force communication failsafe to off, as some of the scripts do not update
+        # calls too often
         failsafe = False
         for i in range(5):
           self._tb.SetCommsFailsafe(False)
           failsafe = self._tb.GetCommsFailsafe()
-          if failsafe:
+          if not failsafe:
             break
-
-        battMin, battMax = self._tb.GetBatteryMonitoringLimits() 
-        battCurrent = self._tb.GetBatteryReading()
-        print 'Current battery monitoring settings:' 
-        print '    Minimum  (red)     %02.2f V' % (battMin)  
-        print '    Half-way (yellow)  %02.2f V' % ((battMin + battMax) / 2) 
-        print '    Maximum  (green)   %02.2f V' % (battMax) 
-        print  
-        print '    Current voltage    %02.2f V' % (battCurrent) 
-        print  
-
-        self._tb.SetBatteryMonitoringLimits(9.6, 12.6) 
-
-        battMin, battMax = self._tb.GetBatteryMonitoringLimits() 
-        battCurrent = self._tb.GetBatteryReading()
-        print 'Current battery monitoring settings:' 
-        print '    Minimum  (red)     %02.2f V' % (battMin)  
-        print '    Half-way (yellow)  %02.2f V' % ((battMin + battMax) / 2) 
-        print '    Maximum  (green)   %02.2f V' % (battMax) 
-        print  
-        print '    Current voltage    %02.2f V' % (battCurrent) 
-        print  
-        self._tb.SetLedShowBattery(True)
+        if failsafe:
+          print('Board %02X failed to report in failsafe mode!' % (self._tb.i2cAddress))
+          sys.exit()
 
         # Abstract out the motor numbers
         self.left_motor = self._tb.SetMotor1
@@ -100,6 +81,7 @@ class Robot(object):
       if not self.drive_enabled:
         return;
         
+      # TODO: Validate speed, adjust for MAX power limitations
       self.right_motor(speed)
     
     def stop_motors(self):
