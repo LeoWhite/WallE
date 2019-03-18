@@ -8,11 +8,29 @@ import time
 
 
 class WallE(Robot):
+  # Configure the battery ranges. Wall-E is powered by a 3S battery
+  battery_min = 9.6
+  battery_max = 12.6
+  
   def __init__(self):
     Robot.__init__(self)
     
     print('Setting up WallE')
     
+    # Ensure the battery range is correctly set
+    self._tb.SetBatteryMonitoringLimits(self.battery_min, self.battery_max)
+
+    battMin, battMax = self._tb.GetBatteryMonitoringLimits()
+    battCurrent = self._tb.GetBatteryReading()
+    print 'Current battery monitoring settings:'
+    print '    Minimum  (red)     %02.2f V' % (battMin)
+    print '    Half-way (yellow)  %02.2f V' % ((battMin + battMax) / 2)
+    print '    Maximum  (green)   %02.2f V' % (battMax)
+    print
+    print '    Current voltage    %02.2f V' % (battCurrent)
+    print
+    self._tb.SetLedShowBattery(True)
+
     # Setup/center HEAD
     self._head = Servo(24)
     
