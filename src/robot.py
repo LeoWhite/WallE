@@ -73,6 +73,15 @@ class Robot(object):
       # Reset servos
       
     
+    def set_motors(self, speed):
+      """Sets both motors to the same speed"""
+      if not self.drive_enabled:
+        return;
+        
+      # TODO: Validate speed, adjust for MAX power limitations
+      
+      self._tb.SetMotors(speed)
+
     def set_left(self, speed):
       if not self.drive_enabled:
         return;
