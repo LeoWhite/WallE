@@ -2,6 +2,7 @@ from WallE import WallE
 from robot import EncoderCounter
 from pid_controller import PIController
 import time
+import math
 
 class MazeRunnerBehaviour(object):
     """Simple maze running cod"""
@@ -21,6 +22,9 @@ class MazeRunnerBehaviour(object):
           # Create a new PI controller for going straight
           controller = PIController(proportional_constant=0.015, integral_constant=0.002)
 
+          self.primary_encoder.set_direction(math.copysign(1, speed))
+          self.secondary_encoder.set_direction(math.copysign(1, speed))
+
           # Reset the encoders
           self.primary_encoder.reset()
           self.secondary_encoder.reset()
@@ -30,20 +34,22 @@ class MazeRunnerBehaviour(object):
 
           # First we want to drive to the next wall
           distance = self._WallE.get_distance()
+          print("Distance ", distance)
           while distance > self._max_distance_from_wall:
-            print("Distance ", distance)
             # Allow the robot to drive
-            time.sleep(0.02)
+            time.sleep(0.01)
             
             # How far off are we?
             error = self.primary_encoder.pulse_count - self.secondary_encoder.pulse_count
+            print("Error ",error)
             adjustment = controller.get_value(error)
-            adjustment = adjustment / 100
             # How fast should the motor move to get there?
             self.set_secondary(speed + adjustment)
+            self.secondary_encoder.set_direction(math.copysign(1, speed+adjustment))
             
             # Update the distance (For testing purposes, so we can output it)
             distance = self._WallE.get_distance()
+            print("Distance ", distance)
 
     def turn_90_degrees(self, speed, direction):          
           if direction == 'L':
@@ -54,7 +60,7 @@ class MazeRunnerBehaviour(object):
             print("Turning right!")
             # Robot needs to be moving 'forwards'
             speed = abs(speed)
-          
+
           self._WallE.drive_arc(90, 0, speed=speed)
 
           print("Done!")
@@ -64,18 +70,20 @@ class MazeRunnerBehaviour(object):
         # Iterate over each direction in the maze map
         for turn in mazeMap:
           # First we want to drive to the next wall
+          print("Driving to wall")
           self.drive_to_wall(speed)
           
           # Stop!
-          self.set_primary(0)
-          self.set_secondary(0)
+          self._WallE.set_motors(0)
+          time.sleep(1)
           
           # What direction do we want to turn?
+          print("Turning to ",turn)
           self.turn_90_degrees(speed, turn)
 
-          self.set_primary(0)
-          self.set_secondary(0)
+          self._WallE.set_motors(0)
+          time.sleep(1)
 
 behaviour = MazeRunnerBehaviour(WallE())
-behaviour.run("L", 0.75)
+behaviour.run("LL", 0.6)
 
