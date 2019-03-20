@@ -85,5 +85,5 @@ class MazeRunnerBehaviour(object):
           time.sleep(1)
 
 behaviour = MazeRunnerBehaviour(WallE())
-behaviour.run("LL", 0.6)
+behaviour.run("LLRRLLLR", 0.6)
 
