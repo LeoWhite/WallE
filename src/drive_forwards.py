@@ -1,30 +1,32 @@
 from WallE import WallE
 from time import sleep
-
+from robot import EncoderCounter
 
 class ObstacleAvoidingBehavior(object):
     """Better obstacle avoiding"""
     def __init__(self, WallE):
         self._WallE = WallE
 
-        self.max_distance = 100
+        self.max_distance = 150
 
-    def run(self):
-        self._WallE.set_left(0.5)
-        self._WallE.set_right(0.5)
+    def driveCallback(self, drive_straight):
+      # Read in the current distance
+      distance = self._WallE.get_distance()
 
-        while True:
-            # Get the sensor readings
-            distance = self._WallE.get_distance()
+      #print("Distances: l", distance)
+      
+      # Still got further to go?
+      if distance > self.max_distance:        
+        # Allow time for travel      
+        #sleep(0.005)
+        
+        return True
+        
+      return False
 
-            print("Distances: l", distance)
-
-            if distance < 150:
-                self._WallE.set_left(0)
-                self._WallE.set_right(0)
-
-            # Wait our delay time
-            sleep(0.1)
+    def run(self):      
+        # Start driving forwards
+        self._WallE.drive_straight(self.driveCallback, 0.6)
 
 behavior = ObstacleAvoidingBehavior(WallE())
 behavior.run()
