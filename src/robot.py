@@ -11,7 +11,7 @@ from time import sleep
 # Main code base for a ThunderBorg based robot.
 
 class Robot(object):
-    wheel_diameter_mm = 56.0
+    wheel_diameter_mm = 65.0
     ticks_per_revolution = 63.0 * 10 # Gear ratio * 10 (We are only counting one channel of the encoder, otherwise it would be * 20)
     wheel_distance_mm =  175.0
 
@@ -85,7 +85,13 @@ class Robot(object):
     def set_left(self, speed):
       if not self.drive_enabled:
         return;
-        
+       
+      if speed > 1.0:
+        speed = 1.0 
+
+      if speed < -1.0:
+        speed = -1.0 
+
       # TODO: Validate speed, adjust for MAX power limitations
       self.left_motor(speed)
 
@@ -93,6 +99,12 @@ class Robot(object):
       if not self.drive_enabled:
         return;
         
+      if speed > 1.0:
+        speed = 1.0 
+
+      if speed < -1.0:
+        speed = -1.0 
+
       # TODO: Validate speed, adjust for MAX power limitations
       self.right_motor(speed)
     
@@ -112,6 +124,42 @@ class Robot(object):
 
     def get_distance(self):
       return self.distance_sensor.get_distance()
+
+    def drive_straight(self, callback, speed=0.75):
+        self.left_encoder.reset()
+        self.right_encoder.reset()
+        
+        controller = PIController(proportional_constant=0.0015, integral_constant=0.0000)
+
+        # Ensure that the encoder knows which way it is going
+        self.left_encoder.set_direction(math.copysign(1, speed))
+        self.right_encoder.set_direction(math.copysign(1, speed))
+
+        # start the motors, and start the loop
+        self.set_motors(speed)
+        while callback(self.left_encoder.pulse_count):
+            # How far off are we?
+            error = self.left_encoder.pulse_count - self.right_encoder.pulse_count
+
+            # How fast should the motor move to get there?
+            adjustment = controller.get_value(error)
+
+            self.set_right(speed + adjustment)
+            self.right_encoder.set_direction(math.copysign(1, speed+adjustment))
+            # Some debug
+            print("Error ", error)
+            #print "Left c:{:.2f} ({:.2f} mm)\tRight c:{:.2f} ({:.2f} mm) e:{:.2f} s:{:.2f} adjustment: {:.2f}".format(
+            #    self.left_encoder.pulse_count, 
+            #    self.left_encoder.distance_in_mm(),
+            #    self.right_encoder.pulse_count,
+            #    self.right_encoder.distance_in_mm(),
+            #    error,
+            #    speed,
+            #    adjustment
+            #)
+
+        # Stop the motors
+        self.stop_motors()
 
     def drive_distances(self, left_distance, right_distance, speed=0.75):
         # We always want the "primary" to be the longest distance, therefore the faster motor
@@ -138,19 +186,16 @@ class Robot(object):
         primary_encoder.reset()
         secondary_encoder.reset()
         
-        controller = PIController(proportional_constant=0.015, integral_constant=0.002)
+        controller = PIController(proportional_constant=0.03, integral_constant=0.002)
 
         # Ensure that the encoder knows which way it is going
         primary_encoder.set_direction(math.copysign(1, speed))
         secondary_encoder.set_direction(math.copysign(1, secondary_speed))
 
         # start the motors, and start the loop
-        print("Setting initial speeds to ",speed,":",secondary_speed)
-        
         set_primary(speed)
         set_secondary(secondary_speed)
         while abs(primary_encoder.pulse_count) < abs(primary_distance) or abs(secondary_encoder.pulse_count) < abs(secondary_distance):
-            # And sleep a bit before calculating
             sleep(0.02)
 
             # How far off are we?
@@ -163,22 +208,22 @@ class Robot(object):
             set_secondary(secondary_speed + adjustment)
             secondary_encoder.set_direction(math.copysign(1, secondary_speed+adjustment))
             # Some debug
-            print "Primary c:{:.2f} ({:.2f} mm)\tSecondary c:{:.2f} ({:.2f} mm) t:{:.2f} e:{:.2f} s:{:.2f} adjustment: {:.2f}".format(
-                primary_encoder.pulse_count, 
-                primary_encoder.distance_in_mm(),
-                secondary_encoder.pulse_count,
-                secondary_encoder.distance_in_mm(),
-                secondary_target,
-                error,
-                secondary_speed,
-                adjustment
-            )
+            #print "Primary c:{:.2f} ({:.2f} mm)\tSecondary c:{:.2f} ({:.2f} mm) t:{:.2f} e:{:.2f} s:{:.2f} adjustment: {:.2f}".format(
+            #    primary_encoder.pulse_count, 
+            #    primary_encoder.distance_in_mm(),
+            #    secondary_encoder.pulse_count,
+            #    secondary_encoder.distance_in_mm(),
+            #    secondary_target,
+            #    error,
+            #    secondary_speed,
+            #    adjustment
+            #)
 
             # Stop the primary if we need to
             if abs(primary_encoder.pulse_count) >= abs(primary_distance):
                 print "primary stop"
                 set_primary(0)
-                secondary_speed = 0
+                #secondary_speed = 0
 
     def drive_arc(self, turn_in_degrees, radius, speed=0.75):
         """ Turn is based on change in heading. """
@@ -190,9 +235,9 @@ class Robot(object):
         else:
             left_radius     = radius + half_width_ticks
             right_radius    = radius - half_width_ticks
-        print "Arc left radius {:.2f}, right_radius {:.2f}".format(left_radius, right_radius)
+        #print "Arc left radius {:.2f}, right_radius {:.2f}".format(left_radius, right_radius)
         radians = math.radians(abs(turn_in_degrees))
         left_distance = int(left_radius * radians)
         right_distance = int(right_radius * radians)
-        print "Arc left distance {}, right_distance {}".format(left_distance, right_distance)
+        #print "Arc left distance {}, right_distance {}".format(left_distance, right_distance)
         self.drive_distances(left_distance, right_distance, speed=speed)
