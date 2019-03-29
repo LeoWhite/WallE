@@ -48,10 +48,6 @@ class ManualDriveBehaviour(object):
     self._driveLeft = 0.0
     self._driveRight = 0.0
 
-    # Initialise the pygame library, ready for use
-    os.environ["SDL_VIDEODRIVER"] = "dummy"
-    pygame.init()
-    
     # Connect up to the joystick
     while pygame.joystick.get_count() == 0:
       self._WallE.set_led(0,0,1)
@@ -65,6 +61,9 @@ class ManualDriveBehaviour(object):
     self._j = pygame.joystick.Joystick(0)
     self._j.init()    
 
+    # Play the startup sound
+    soundStartup.play()
+    
     # Make sure we release it at exit
     atexit.register(self.shutdown)
     
@@ -90,6 +89,15 @@ class ManualDriveBehaviour(object):
         # Have the joysticks moved?
         elif event.type == pygame.JOYAXISMOTION:
           updateValues = True
+        elif event.type == pygame.JOYBUTTONDOWN:
+            # A button on the joystick just got pushed down
+            updateValues = True
+            if event.button == PS3_DPAD_DOWN:
+              global soundWallE
+              soundWallE.play()
+            #elif event.button == PS3_CROSS: 
+             # self._WallE.fire_gun()
+            
         
         # Anything to process?
         if updateValues:
@@ -112,6 +120,9 @@ class ManualDriveBehaviour(object):
           # Update the motors
           self._WallE.set_left(self._driveLeft)
           self._WallE.set_right(self._driveRight)
+          
+          # Check for any other button presses
+          
     
     
   def shutdown(self):
@@ -119,6 +130,32 @@ class ManualDriveBehaviour(object):
     self._WallE.set_right(0)
     self._j.quit()
 
+if __name__ == '__main__':    
+  # Setup pygame
+  # Initialise the pygame library, ready for use
+  os.environ["SDL_VIDEODRIVER"] = "dummy"
+  pygame.init()
     
-behaviour=ManualDriveBehaviour(WallE())
-behaviour.run()
+  # Setup the music
+  pygame.mixer.init()
+  pygame.mixer.music.set_volume(1.0)
+
+  # and preload the samples
+  musicAudioChannel = None
+  musicAudio = pygame.mixer.Sound("/home/pi/Audio/PutOnYourSundayClothes.wav")
+  #musicAudio.set_volume(0.2)
+
+  soundGun = pygame.mixer.Sound("/home/pi/Audio/Gun.wav")
+  soundStartup = pygame.mixer.Sound("/home/pi/Audio/Startup.wav")
+  soundWallE = pygame.mixer.Sound("/home/pi/Audio/Walle2.wav")
+
+  def playButtonCallback():
+    global musicAudioChannel
+    
+    if musicAudioChannel == None or False == musicAudioChannel.get_busy():
+      musicAudioChannel = musicAudio.play()
+    else:
+      musicAudioChannel.stop()
+
+  behaviour=ManualDriveBehaviour(WallE(playButtonCallback))
+  behaviour.run()
