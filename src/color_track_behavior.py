@@ -81,7 +81,7 @@ class ColorTrackingBehavior(object):
                 # Now produce left and right motor speeds
                 #self.robot.set_left(speed_value - direction_value)
                 #self.robot.set_right(speed_value + direction_value)
-                time.sleep(0.01)
+                time.sleep(0.1)
             else:
                 self._WallE.stop_motors()
 

@@ -2,35 +2,16 @@ from robot import Robot
 from gpiozero import Servo, LED, Button
 import atexit
 import time
-
-#from gpiozero.pins.pigpiod import PiGPIOPin
-#import gpiozero.devices
-#gpiozero.devices.pin_factory = PiGPIOPin
-
-# The WallE class builds on top of the base robot, setting up items that
-# are specific to WallE (e.g. arms, head)
-
-
-#pg.mixer.init()
-#pg.init()
-
-#a1Note = pg.mixer.Sound("F:\Project Harpsichord\The wavs\A1.wav")
-#a2Note = pg.mixer.Sound("F:\Project Harpsichord\The wavs\A0.wav")
-
-#pg.mixer.set_num_channels(50)
-
-#for i in range(25):
-#    a1Note.play()
-#    time.sleep(0.3)
-#    a2Note.play()
-#    time.sleep(0.3)
-    
+import pigpio
     
     
 class WallE(Robot):
   # Configure the battery ranges. Wall-E is powered by a 3S battery
   battery_min = 9.6
   battery_max = 12.6
+  
+  servo_mid_point = 800
+  servo_range = 150
   
   def __init__(self, playButtonCallback=None):
     Robot.__init__(self)
@@ -51,17 +32,17 @@ class WallE(Robot):
     print
     self._tb.SetLedShowBattery(True)
 
-    # Setup/center HEAD
-    self._head = Servo(24)
+    # Setup/center HEAD (650,800,950)
+    self._head = 24
     
     # Setup the left arm
-    self._leftArm = Servo(5)
+    self._leftArm = 5
     
     # Setup the right arm
-    self._rightArm = Servo(12)
+    self._rightArm = 12
     
     # Setup the gun servo
-    #self._gun = Servo(13, initial_value=-0.15)
+    self._gun = 13
     
     # Center the servos
     self.center_servos()
@@ -82,13 +63,19 @@ class WallE(Robot):
     atexit.register(self.center_servos)
 
   def set_left_arm(self, position):
-    self._leftArm.value = position
+    #global pi
+    value = self.servo_mid_point + (position * self.servo_range)
+    #pi.set_servo_pulsewidth(self._leftArm, value)
   
   def set_right_arm(self, position):
-    self._rightArm.value = position
+    #global pi
+    value = self.servo_mid_point + (position * self.servo_range)
+    #pi.set_servo_pulsewidth(self._rightArm, value)
   
   def set_head_pan(self, position):
-    self._head.value = position
+    #global pi
+    value = self.servo_mid_point + (position * self.servo_range)
+    #pi.set_servo_pulsewidth(self._head, value)
     
   def fire_gun():
     self._gun.value = -0.3
