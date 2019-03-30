@@ -1,8 +1,15 @@
 from robot import Robot
 from gpiozero import Servo, LED, Button
+from pid_controller import PIController
+import math
 import atexit
 import time
 import pigpio
+
+# Include camera and openCV for image processing
+import cv2
+import numpy as np
+import pi_camera_stream
     
     
 class WallE(Robot):
@@ -12,7 +19,10 @@ class WallE(Robot):
   
   servo_mid_point = 1500
   servo_range = 180
-  
+
+  correct_radius = 120
+  center = 160
+
   def __init__(self, playButtonCallback=None):
     Robot.__init__(self)
     
@@ -60,6 +70,9 @@ class WallE(Robot):
     if playButtonCallback != None:
       self._playButton.when_pressed = playButtonCallback
     
+    # Startup camera
+    self._camera = pi_camera_stream.setup_camera()
+
     # Ensure the motors get stopped when the code exits
     atexit.register(self.exit)
 
@@ -88,8 +101,78 @@ class WallE(Robot):
   def exit(self):
     self.center_servos()
     self._pigpio.stop()
-    
 
+  def find_object(self, original_frame, low_range, high_range):
+      """Find the largest enclosing circle for all contours in a masked image.
+      Returns: the masked image, the object coordinates, the object radius"""
+      frame_hsv = cv2.cvtColor(original_frame, cv2.COLOR_BGR2HSV)
+      masked = cv2.inRange(frame_hsv, low_range, high_range)
+
+      # Find the contours of the image (outline points)
+      contour_image = np.copy(masked)
+      contours, _ = cv2.findContours(contour_image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+      # Find enclosing circles
+      circles = [cv2.minEnclosingCircle(cnt) for cnt in contours]
+      # Filter for the largest one
+      largest = (0, 0), 0
+      for (x, y), radius in circles:
+          if radius > largest[1]:
+              largest = (int(x), int(y)), int(radius)
+      return masked, largest[0], largest[1]
+
+
+  def process_frame(self, frame_orig, low_range, high_range):
+      # Crop the frame
+      frame = frame_orig
+      
+      
+      #frame = frame_orig
+      # Find the largest enclosing circle
+      masked, coordinates, radius = self.find_object(frame, low_range, high_range)
+      # Now back to 3 channels for display
+      processed = cv2.cvtColor(masked, cv2.COLOR_GRAY2BGR)
+      # Draw our circle on the original frame, then display this
+      cv2.circle(frame, coordinates, radius, [255, 0, 0])
+#        self.make_display(frame, processed)
+      cv2.imshow('output',frame)
+      cv2.waitKey(1)
+      # Yield the object details
+      return coordinates, radius
+
+
+  def drive_to_colour(self, callback, low_range, high_range, speed=0.75):
+      self.left_encoder.reset()
+      self.right_encoder.reset()
+
+      # Direction controller
+      controller = PIController(proportional_constant=0.0015, integral_constant=0.0000, windup_limit=400)
+
+      # Ensure that the encoder knows which way it is going
+      self.left_encoder.set_direction(math.copysign(1, speed))
+      self.right_encoder.set_direction(math.copysign(1, speed))
+
+      # start the loop
+      for frame in pi_camera_stream.start_stream(self._camera):
+        # Time to exit?
+        if callback(self.left_encoder.pulse_count) == False:
+          break
+          
+        # Process the frame
+        (x, y), radius = self.process_frame(frame, low_range, high_range)
+        
+        if radius > 20:
+            # The size is the first error
+            radius_error = self.correct_radius - radius
+            #speed_value = speed_pid.get_value(radius_error)
+            # And the second error is the based on the center coordinate.
+            direction_error = self.center - x
+            direction_value = controller.get_value(direction_error)
+            print("radius: %d, radius_error: %d direction_error: %d, direction_value: %.2f" %
+                (radius, radius_error, direction_error, direction_value))
+            # Now produce left and right motor speeds
+            self.set_left(speed - direction_value)
+            self.set_right(speed + direction_value)
+            time.sleep(0.1)
+        else:
+            self.stop_motors()
   
-    
-
