@@ -13,9 +13,13 @@ class ColorTrackingBehavior(object):
     """Behavior to find and get close to a colored object"""
     def __init__(self, WallE):
         self._WallE = WallE
-        # Tuning values
-        self.low_range = (60-20, 100, 50)
-        self.high_range = (60+20, 255, 255)
+        # Tuning values (Green)
+        #self.low_range = (60-20, 100, 50)
+        #self.high_range = (60+20, 255, 255)
+        
+        sensitivity = 100
+        self.low_range = np.array([0,0,255-sensitivity])
+        self.high_range = np.array([255,sensitivity,255])
         self.correct_radius = 120
         self.center = 160
 
@@ -37,7 +41,11 @@ class ColorTrackingBehavior(object):
                 largest = (int(x), int(y)), int(radius)
         return masked, largest[0], largest[1]
 
-    def process_frame(self, frame):
+    def process_frame(self, frame_orig):
+        # Crop the frame
+        frame = frame_orig[80:160, 0:320]
+        
+        #frame = frame_orig
         # Find the largest enclosing circle
         masked, coordinates, radius = self.find_object(frame)
         # Now back to 3 channels for display
@@ -55,8 +63,7 @@ class ColorTrackingBehavior(object):
         camera = pi_camera_stream.setup_camera()
 
         # direction pid - how far from the middle X is.
-        direction_pid = PIController(proportional_constant=0.25, 
-            integral_constant=0.1, windup_limit=400)
+        direction_pid = PIController(proportional_constant=0.0015, integral_constant=0.0000, windup_limit=400)
             
 
         # warm up and servo move time
@@ -79,8 +86,8 @@ class ColorTrackingBehavior(object):
                 print("radius: %d, radius_error: %d direction_error: %d, direction_value: %.2f" %
                     (radius, radius_error, direction_error, direction_value))
                 # Now produce left and right motor speeds
-                #self.robot.set_left(speed_value - direction_value)
-                #self.robot.set_right(speed_value + direction_value)
+                self._WallE.set_left(0.5 - direction_value)
+                self._WallE.set_right(0.5 + direction_value)
                 time.sleep(0.1)
             else:
                 self._WallE.stop_motors()
