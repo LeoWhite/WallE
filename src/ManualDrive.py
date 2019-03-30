@@ -137,17 +137,21 @@ if __name__ == '__main__':
   pygame.init()
     
   # Setup the music
+  audioVolume = 0.2
   pygame.mixer.init()
-  pygame.mixer.music.set_volume(1.0)
+  pygame.mixer.music.set_volume(audioVolume)
 
   # and preload the samples
   musicAudioChannel = None
   musicAudio = pygame.mixer.Sound("/home/pi/Audio/PutOnYourSundayClothes.wav")
-  #musicAudio.set_volume(0.2)
+  musicAudio.set_volume(audioVolume)
 
   soundGun = pygame.mixer.Sound("/home/pi/Audio/Gun.wav")
+  soundGun.set_volume(audioVolume)
   soundStartup = pygame.mixer.Sound("/home/pi/Audio/Startup.wav")
+  soundStartup.set_volume(audioVolume)
   soundWallE = pygame.mixer.Sound("/home/pi/Audio/Walle2.wav")
+  soundWallE.set_volume(audioVolume)
 
   def playButtonCallback():
     global musicAudioChannel

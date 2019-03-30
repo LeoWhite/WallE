@@ -10,13 +10,16 @@ class WallE(Robot):
   battery_min = 9.6
   battery_max = 12.6
   
-  servo_mid_point = 800
+  servo_mid_point = 1500
   servo_range = 150
   
   def __init__(self, playButtonCallback=None):
     Robot.__init__(self)
     
     print('Setting up WallE')
+    
+    # Init PIGPIO
+    self._pigpio =  pigpio.pi()
     
     # Ensure the battery range is correctly set
     self._tb.SetBatteryMonitoringLimits(self.battery_min, self.battery_max)
@@ -47,8 +50,6 @@ class WallE(Robot):
     # Center the servos
     self.center_servos()
     
-    
-    
     # Setup the eyes
     self._eyes = LED(25)
     # self._eyes.on()
@@ -60,22 +61,20 @@ class WallE(Robot):
       self._playButton.when_pressed = playButtonCallback
     
     # Ensure the motors get stopped when the code exits
-    atexit.register(self.center_servos)
+    atexit.register(self.exit)
 
   def set_left_arm(self, position):
-    #global pi
     value = self.servo_mid_point + (position * self.servo_range)
-    #pi.set_servo_pulsewidth(self._leftArm, value)
+    self._pigpio.set_servo_pulsewidth(self._leftArm, value)
   
   def set_right_arm(self, position):
-    #global pi
     value = self.servo_mid_point + (position * self.servo_range)
-    #pi.set_servo_pulsewidth(self._rightArm, value)
+    #print("Value %d" % (value))
+    self._pigpio.set_servo_pulsewidth(self._rightArm, value)
   
   def set_head_pan(self, position):
-    #global pi
     value = self.servo_mid_point + (position * self.servo_range)
-    #pi.set_servo_pulsewidth(self._head, value)
+    self._pigpio.set_servo_pulsewidth(self._head, value)
     
   def fire_gun():
     self._gun.value = -0.3
@@ -86,6 +85,11 @@ class WallE(Robot):
     self.set_left_arm(0)
     self.set_right_arm(0)
     self.set_head_pan(0)
+  
+  def exit(self):
+    self.center_servos()
+    self._pigpio.stop()
+    
 
   
     
