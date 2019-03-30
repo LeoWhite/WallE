@@ -22,6 +22,8 @@ class WallE(Robot):
 
   correct_radius = 120
   center = 160
+  
+  _debug = False
 
   def __init__(self, playButtonCallback=None):
     Robot.__init__(self)
@@ -129,13 +131,15 @@ class WallE(Robot):
       #frame = frame_orig
       # Find the largest enclosing circle
       masked, coordinates, radius = self.find_object(frame, low_range, high_range)
-      # Now back to 3 channels for display
-      processed = cv2.cvtColor(masked, cv2.COLOR_GRAY2BGR)
-      # Draw our circle on the original frame, then display this
-      cv2.circle(frame, coordinates, radius, [255, 0, 0])
-#        self.make_display(frame, processed)
-      cv2.imshow('output',frame)
-      cv2.waitKey(1)
+      
+      if self._debug:
+        # Now back to 3 channels for display
+        processed = cv2.cvtColor(masked, cv2.COLOR_GRAY2BGR)
+        # Draw our circle on the original frame, then display this
+        cv2.circle(frame, coordinates, radius, [255, 0, 0])
+        cv2.imshow('output',frame)
+        cv2.waitKey(1)
+      
       # Yield the object details
       return coordinates, radius
 
@@ -167,12 +171,15 @@ class WallE(Robot):
             # And the second error is the based on the center coordinate.
             direction_error = self.center - x
             direction_value = controller.get_value(direction_error)
-            print("radius: %d, radius_error: %d direction_error: %d, direction_value: %.2f" %
-                (radius, radius_error, direction_error, direction_value))
+            
+            if self._debug:
+              print("radius: %d, radius_error: %d direction_error: %d, direction_value: %.2f" %
+                  (radius, radius_error, direction_error, direction_value))
+            
             # Now produce left and right motor speeds
             self.set_left(speed - direction_value)
             self.set_right(speed + direction_value)
-            time.sleep(0.1)
         else:
             self.stop_motors()
+            break
   
