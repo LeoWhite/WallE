@@ -70,6 +70,8 @@ class ManualDriveBehaviour(object):
     atexit.register(self.shutdown)
     
   def run(self):
+    global soundWallE
+
     # TODO: Set arms and heads to default locations
     driveUpDown = 0.0
     driveLeftRight = 0.0
@@ -95,18 +97,26 @@ class ManualDriveBehaviour(object):
             # A button on the joystick just got pushed down
             updateValues = True
             if event.button == PS3_DPAD_DOWN:
-              global soundWallE
               soundWallE.play()
             elif event.button == PS3_DPAD_LEFT:
-              if self._headPan > -1.0:
-                self._headPan = self._headPan - 0.1
-                self._WallE.set_head_pan(self._headPan)
+                self._WallE.set_head_pan(-1)
             elif event.button == PS3_DPAD_RIGHT:
-              if self._headPan < 1.0:
-                self._headPan = self._headPan + 0.1
-                self._WallE.set_head_pan(self._headPan)
+                self._WallE.set_head_pan(1)
+            elif event.button == PS3_DPAD_UP:
+                self._WallE.set_right_arm(1)
             #elif event.button == PS3_CROSS: 
              # self._WallE.fire_gun()
+        elif event.type == pygame.JOYBUTTONUP:
+            # A button on the joystick just got pushed down
+            updateValues = True
+            if event.button == PS3_DPAD_DOWN:
+              soundWallE.play()
+            elif event.button == PS3_DPAD_LEFT:
+                self._WallE.set_head_pan(0)
+            elif event.button == PS3_DPAD_RIGHT:
+                self._WallE.set_head_pan(0)
+            elif event.button == PS3_DPAD_UP:
+                self._WallE.set_right_arm(0)
             
         
         # Anything to process?
