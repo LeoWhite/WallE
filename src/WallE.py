@@ -11,7 +11,7 @@ class WallE(Robot):
   battery_max = 12.6
   
   servo_mid_point = 1500
-  servo_range = 150
+  servo_range = 180
   
   def __init__(self, playButtonCallback=None):
     Robot.__init__(self)
@@ -69,7 +69,6 @@ class WallE(Robot):
   
   def set_right_arm(self, position):
     value = self.servo_mid_point + (position * self.servo_range)
-    #print("Value %d" % (value))
     self._pigpio.set_servo_pulsewidth(self._rightArm, value)
   
   def set_head_pan(self, position):

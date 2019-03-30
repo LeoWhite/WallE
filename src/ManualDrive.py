@@ -5,23 +5,23 @@ import os
 import time
 
 # Key mappings. Move to a seperate class?
-PS3_SELECT = 0
-PS3_L3 = 1
-PS3_R3 = 2
-PS3_START = 3
-PS3_DPAD_UP = 4
-PS3_DPAD_RIGHT = 5
-PS3_DPAD_DOWN = 6
-PS3_DPAD_LEFT = 7
-PS3_L2 = 8
-PS3_R2 = 9
-PS3_L1 = 10
-PS3_R1 = 11
-PS3_TRIANGLE = 12
-PS3_CIRCLE = 13
-PS3_CROSS =  14
-PS3_SQUARE = 15
-PS3_PLAYSTATION = 16
+PS3_SELECT = 8
+PS3_L3 = 11
+PS3_R3 = 12
+PS3_START = 9
+PS3_DPAD_UP = 13
+PS3_DPAD_RIGHT = 16
+PS3_DPAD_DOWN = 14
+PS3_DPAD_LEFT = 15
+PS3_L2 = 6
+PS3_R2 = 7
+PS3_L1 = 4
+PS3_R1 = 5
+PS3_TRIANGLE = 2
+PS3_CIRCLE = 1
+PS3_CROSS =  0
+PS3_SQUARE = 3
+PS3_PLAYSTATION = 10
 
 PS3_AXIS_LEFT_H = 0
 PS3_AXIS_LEFT_V = 1
@@ -47,6 +47,8 @@ class ManualDriveBehaviour(object):
     self._WallE = WallE
     self._driveLeft = 0.0
     self._driveRight = 0.0
+    
+    self._headPan = 0.0
 
     # Connect up to the joystick
     while pygame.joystick.get_count() == 0:
@@ -71,7 +73,7 @@ class ManualDriveBehaviour(object):
     # TODO: Set arms and heads to default locations
     driveUpDown = 0.0
     driveLeftRight = 0.0
-    
+
     # Run for ever
     running = True
     
@@ -95,6 +97,14 @@ class ManualDriveBehaviour(object):
             if event.button == PS3_DPAD_DOWN:
               global soundWallE
               soundWallE.play()
+            elif event.button == PS3_DPAD_LEFT:
+              if self._headPan > -1.0:
+                self._headPan = self._headPan - 0.1
+                self._WallE.set_head_pan(self._headPan)
+            elif event.button == PS3_DPAD_RIGHT:
+              if self._headPan < 1.0:
+                self._headPan = self._headPan + 0.1
+                self._WallE.set_head_pan(self._headPan)
             #elif event.button == PS3_CROSS: 
              # self._WallE.fire_gun()
             
@@ -120,9 +130,6 @@ class ManualDriveBehaviour(object):
           # Update the motors
           self._WallE.set_left(self._driveLeft)
           self._WallE.set_right(self._driveRight)
-          
-          # Check for any other button presses
-          
     
     
   def shutdown(self):
