@@ -17,11 +17,27 @@ class FollowLineBehavior(object):
       return True
 
     def run(self):      
-        self._WallE.drive_to_colour(self.driveCallback, self.low_range, self.high_range, 0.5)
+        self._WallE.drive_to_colour(self.driveCallback, self.low_range, self.high_range, 0.45)
 
-if __name__ == '__main__':   
-  behavior = FollowLineBehavior(WallE())
+if __name__ == '__main__':
+  buttonPressed = False
   
   # Allow some time for the camera to settle
-  sleep(5)
-  behavior.run()
+  def playButtonCallback():
+    global buttonPressed
+    buttonPressed = True
+
+  behavior = FollowLineBehavior(WallE(playButtonCallback))
+  
+
+  while True:
+    if buttonPressed:
+      buttonPressed = False
+      # Allow time for the user to back away
+      sleep(1)
+      
+      # Start following
+      behavior.run()
+
+
+    sleep(0.1)
