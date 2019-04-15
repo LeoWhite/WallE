@@ -31,7 +31,7 @@ disp = ST7735.ST7735(
     port=0,
     cs=0,
     dc=9,
-    backlight=18,
+    backlight=7,
     rotation=90,
     spi_speed_hz=4000000
 )
