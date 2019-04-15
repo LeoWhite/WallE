@@ -5,6 +5,8 @@ import math
 import atexit
 import time
 import pigpio
+from gpiozero import DigitalOutputDevice
+
 
 # Include camera and openCV for image processing
 import cv2
@@ -23,7 +25,7 @@ class WallE(Robot):
   correct_radius = 120
   center = 160
   
-  _debug = False
+  _debug = True
 
   def __init__(self, playButtonCallback=None):
     Robot.__init__(self)
@@ -57,7 +59,8 @@ class WallE(Robot):
     self._rightArm = 12
     
     # Setup the gun servo
-    self._gun = 13
+    #self._gun = 13
+    #self._laser = DigitalOutputDevice(17, active_high=False)
     
     # Center the servos
     self.center_servos()
@@ -79,26 +82,27 @@ class WallE(Robot):
     atexit.register(self.exit)
 
   def set_left_arm(self, position):
-    value = self.servo_mid_point + (position * self.servo_range)
+    value = self.servo_mid_point + (position * 250)
     self._pigpio.set_servo_pulsewidth(self._leftArm, value)
   
   def set_right_arm(self, position):
-    value = self.servo_mid_point + (position * self.servo_range)
+    value = self.servo_mid_point + (position * 250)
     self._pigpio.set_servo_pulsewidth(self._rightArm, value)
   
   def set_head_pan(self, position):
     value = self.servo_mid_point + (position * self.servo_range)
     self._pigpio.set_servo_pulsewidth(self._head, value)
     
-  def fire_gun():
-    self._gun.value = -0.3
-    time.sleep(0.1)
-    self._gun.value = -0.2
+  def fire_gun(self):
+    #self._pigpio.set_servo_pulsewidth(self._gun, 1425)
+    time.sleep(0.5)
+    #self._pigpio.set_servo_pulsewidth(self._gun, 1500)
   
   def center_servos(self):
     self.set_left_arm(0)
     self.set_right_arm(0)
     self.set_head_pan(0)
+    #self._pigpio.set_servo_pulsewidth(self._gun, 1500)
   
   def exit(self):
     self.center_servos()

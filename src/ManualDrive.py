@@ -1,4 +1,7 @@
 from WallE import WallE
+import os
+#os.putenv('DISPLAY', ':0.0')
+os.environ['SDL_VIDEODRIVER'] = 'dummy'
 import pygame
 import atexit
 import os
@@ -78,7 +81,9 @@ class ManualDriveBehaviour(object):
 
     # Run for ever
     running = True
-    
+   
+    pygame.event.set_allowed([pygame.JOYAXISMOTION, pygame.JOYBUTTONDOWN, pygame.JOYBUTTONUP]) 
+
     while running:
       # Read in the queued up events
       events = pygame.event.get()
@@ -104,8 +109,8 @@ class ManualDriveBehaviour(object):
                 self._WallE.set_head_pan(1)
             elif event.button == PS3_DPAD_UP:
                 self._WallE.set_right_arm(1)
-            #elif event.button == PS3_CROSS: 
-             # self._WallE.fire_gun()
+            elif event.button == PS3_CROSS: 
+              self._WallE.fire_gun()
         elif event.type == pygame.JOYBUTTONUP:
             # A button on the joystick just got pushed down
             updateValues = True
@@ -150,11 +155,12 @@ class ManualDriveBehaviour(object):
 if __name__ == '__main__':    
   # Setup pygame
   # Initialise the pygame library, ready for use
-  os.environ["SDL_VIDEODRIVER"] = "dummy"
+  #os.environ["SDL_VIDEODRIVER"] = "dummy"
   pygame.init()
-    
+  pygame.display.set_mode((1,1))
+ 
   # Setup the music
-  audioVolume = 0.2
+  audioVolume = 1
   pygame.mixer.init()
   pygame.mixer.music.set_volume(audioVolume)
 

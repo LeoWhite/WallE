@@ -9,7 +9,7 @@ class MazeRunnerBehaviour(object):
     def __init__(self, WallE):
         self._WallE = WallE
 
-        self._max_distance_from_wall = 250
+        self._max_distance_from_wall = 175
         
         # Use left as "primary"  motor, the right is keeping up
         self.set_primary        = self._WallE.set_left
@@ -85,5 +85,5 @@ class MazeRunnerBehaviour(object):
           time.sleep(1)
 
 behaviour = MazeRunnerBehaviour(WallE())
-behaviour.run("LLRRLLLR", 0.6)
+behaviour.run("LLRRLLLRR", 0.6)
 

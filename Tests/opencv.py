@@ -8,8 +8,31 @@ camera = pi_camera_stream.setup_camera()
 cv2.namedWindow("output", cv2.WINDOW_NORMAL)
 cv2.namedWindow("outputimg", cv2.WINDOW_NORMAL)
 
+# Green
 lowerBound=np.array([60-20,100,50])
 upperBound=np.array([60+20,255,255])
+
+# Red
+#lowerBound=np.array([160,100,50])
+#upperBound=np.array([179,255,255])
+
+
+# Blue
+#lowerBound=np.array([100,100,50])
+#upperBound=np.array([120,255,255])
+
+# Yello
+#lowerBound=np.array([10,100,50])
+#upperBound=np.array([20,255,255])
+
+
+# Whi40
+sensitivity = 100
+#lowerBound = np.array([0,0,255-sensitivity])
+#upperBound = np.array([255,sensitivity,255])
+
+#lowerBound = np.array([0,0,255-sensitivity])
+#upperBound = np.array([0,0,255])
 
         
 for frame in pi_camera_stream.start_stream(camera):
