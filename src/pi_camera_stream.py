@@ -9,7 +9,7 @@ encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
 def setup_camera():
     camera = PiCamera()
     camera.resolution = size
-    camera.rotation = 0
+    camera.rotation = 180
     return camera
 
 def start_stream(camera):
